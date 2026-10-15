@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id              String   @id
+  title           String
+  publisher       String
+  platforms       String[]
+  ruLocalization  String
+  coverUrl        String
+  heroUrl         String?
+  discount        Int      @default(0)
+  shelfTags       String[]
+  editions        Json
+  isAutoSynced    Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+
+  @@index([shelfTags])
+  @@index([isAutoSynced])
+}
+
+model RegionConfig {
+  code            String   @id
+  name            String
+  flag            String
+  symbol          String
+  currencyCode    String
+  rateToBYN       Float
+  denominations   Json
+}
+
+model PaymentCredentials {
+  id            String   @id @default("singleton")
+  cardNumber    String?
+  eripPath      String?
+  usdtAddress   String?
+  updatedAt     DateTime @updatedAt
+}
+
+model Order {
+  id              String       @id @default(cuid())
+  userId          String
+  userName        String?
+  items           Json
+  totalStore      Int
+  totalFiat       Float
+  currency        String
+  region          String
+  giftCards       Json
+  remainder       Int
+  paymentMethod   String
+  receiptFileId   String?
+  status          OrderStatus  @default(PENDING)
+  adminNote       String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  COMPLETED
+}
+
+model BotSettings {
+  id        String   @id @default("singleton")
+  adminId   String
+  webappUrl String
+  adminUrl  String
+}
